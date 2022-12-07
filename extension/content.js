@@ -4,6 +4,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     let originalActiveElement;
     let text;
 
+    console.log("Asking ChatGPT ...");
+
     // If there's an active text input
     if (
       document.activeElement &&
@@ -17,6 +19,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       text =
         document.getSelection().toString().trim() ||
         document.activeElement.textContent.trim();
+
+        console.log("Asking ChatGPT ..."+text);
     } else {
       // If no active text input use any selected text on page
       text = document.getSelection().toString().trim();
@@ -32,14 +36,18 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     showLoadingCursor();
 
     // Send the text to the API endpoint
-    fetch("http://localhost:3000", {
+    fetch("http://localhost:8000", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ message: text }),
     })
-      .then((response) => response.json())
+      .then((response) => 
+      
+      response.json()
+      
+      )
       .then(async (data) => {
         // Use original text element and fallback to current active text element
         const activeElement =
