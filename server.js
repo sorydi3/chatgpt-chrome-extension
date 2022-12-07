@@ -4,15 +4,21 @@ import cors from "cors";
 import { ChatGPTAPI } from "chatgpt";
 
 import config from "./config.js";
+import dotenv from 'dotenv';
+dotenv.config();
 
 const app = express().use(cors()).use(bodyParser.json());
-const gptApi = new ChatGPTAPI();
+const gptApi = new ChatGPTAPI({ sessionToken: process.env.SESSION_TOKEN });
 
 const Config = configure(config);
 
+
 app.post("/", async (req, res) => {
   try {
+    console.log(`Received message: ${req.body.message}`);
+    //req.setHeader('Access-Control-Allow-Origin', '*');
     const rawReply = await gptApi.sendMessage(req.body.message);
+    console.log(`Received reply: ${rawReply}`);
     const reply = await Config.parse(rawReply);
     res.json({ reply });
   } catch (error) {
@@ -23,9 +29,18 @@ app.post("/", async (req, res) => {
 
 async function start() {
   console.log(`Starting up ...`);
-  await gptApi.init({ auth: "blocking" });
-  await Config.train();
-  app.listen(3000, () => console.log(`Listening on port 3000`));
+ // await gptApi.init({ auth: "blocking" });
+  gptApi.getIsSignedIn().then((isSignedIn) => {
+    if (!isSignedIn) {
+      console.log(`Not signed in!`);
+    }else{
+      console.log(`Signed in!`);
+    }
+  });
+  console.log(`ChatGPT API ready!\n`);
+  //await Config.train();
+  app.listen(8000, () => console.log(`Listening on port 8000`));
+  console.log(`Ready!!!!\n`);
 }
 
 function configure({ plugins, ...opts }) {
